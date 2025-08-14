@@ -1,13 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+
+    <link rel="icon" type="image/svg" href="/favicon.svg" />
+    <link rel="stylesheet" href="/src/style.css" />
+
+    <title>multiplayer snake</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="error-message" hidden>An undefined error has occured.</div>
+
+    <h1>multiplayer snake</h1>
+
+    <main>
+      <div class="grid">
+        <span id="row0">⬛🟩⬛🟩⬛</span><br/>
+        <span id="row1">🟩⬛🟩⬛🟩</span><br/>
+        <span id="row2">⬛🟩⬛🟩⬛</span><br/>
+        <span id="row3">🟩⬛🟩⬛🟩</span><br/>
+        <span id="row4">⬛🟩⬛🟩⬛</span><br/>
+      </div>
+
+      <div class="buttons">
+        <button id="button0">🗘</button>
+        <button id="button1">🗘</button>
+        <button id="button2">🗘</button>
+      </div>
+    </main>
+
+    <footer>
+      <p><a href="https://hcks.dev">© hcks 2025 <img src="/cube-drawing-hcks.png" /></a><br/>
+         <span class="small">plz dont break the daytabase :)</span>
+      </p>
+    </footer>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
