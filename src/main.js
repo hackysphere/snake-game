@@ -20,7 +20,8 @@ const database = getDatabase(app);
 
 
 
-const MOVEDELAY = 120;
+// const MOVEDELAY = 120000;  // milliseconds due to Date.now()
+const MOVEDELAY = 15000; // FIXME: dev
 let lastVoteTs = 0;  // TODO: use cookies or something to prevent double voting
 let lastVoteChoice = null;  // TODO: better with cookies
 let dbState;
@@ -70,6 +71,7 @@ function setButtons() {
       $(`button${i}`).setAttribute("disabled", true);
     } else {
       $(`button${i}`).removeAttribute("disabled");
+      lastVoteChoice = null;
     }
     $(`button${i}`).className = "";
 
@@ -91,13 +93,11 @@ function setButtons() {
       default:
         char = "❓"
         $(`button${i}`).setAttribute("disabled", true);
-        showError("Error: Invalid last move.\nIf this keeps repeating, contact me so I can fix this")
+        showError("Error: Invalid last move")
         break;
     }
     $(`button${i}`).innerHTML = char;
   }
-
-  console.log("buttons updated");
 
   if (lastVoteChoice) {
     $(`button${lastVoteChoice}`).innerHTML += "✅";
@@ -125,33 +125,6 @@ function sendVote(state) {
   });
 }
 
-function resetState() {
-  set(ref(database), {
-    "grid": [
-      "00000",
-      "00000",
-      "33020",
-      "00000",
-      "00000",
-    ],
-    "last_dir": 0,
-    "last_ts": 0,
-    "move": 1,
-    "next_ts": Date.now() + MOVEDELAY,
-    "snake_pos": [
-      [2, 1],
-      [2, 0],
-    ],
-    "start_ts": Date.now(),
-    "votes": {
-      "0": 0,
-      "1": 0,
-      "2": 0,
-    },
-  });
-  lastVoteTs = 0;
-};
-
 // firefox ignores the default attributes if the page is not hard-reloaded
 $("button0").setAttribute("disabled", true);
 $("button1").setAttribute("disabled", true);
@@ -171,8 +144,6 @@ $("button2").addEventListener("click", sendVote);
 
 // dev, very unsafe
 if (!false) {
-  window.DEV_RESETSTATE = resetState;
-  window.DEV_PUSHSTATE = content => set(ref(database), content);
   window.DEV_DEFAULTSTATE = {
     "grid": [
       "00000",
@@ -196,11 +167,14 @@ if (!false) {
       "2": 0,
     }
   };
-  
+
   window.DEV_BLOCKEDSTATE = structuredClone(window.DEV_DEFAULTSTATE);
   window.DEV_BLOCKEDSTATE.last_ts = -1;
 
-  window.DEV_GETVARS = () => {console.log(lastVoteTs); console.log(dbState);};
+  window.DEV_GETVARS = () => {return [lastVoteTs, dbState]};
+  window.DEV_PUSHSTATE = content => set(ref(database), content);
+  window.DEV_RESETSTATE = () => window.DEV_PUSHSTATE(DEV_DEFAULTSTATE);
+  window.DEV_RESETTIME = () => {set(ref(database, "last_ts"), Date.now())}
 
   window.$ = $;
 }
