@@ -57,6 +57,10 @@ button:disabled {
     background-color: darkred;
 }
 
+button.chosen-vote {
+    background-color: darkgreen;
+}
+
 footer {
     font-size: 0.8rem;
 }

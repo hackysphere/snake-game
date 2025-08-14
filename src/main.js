@@ -22,6 +22,7 @@ const database = getDatabase(app);
 
 const MOVEDELAY = 120;
 let lastVoteTs = 0;  // TODO: use cookies or something to prevent double voting
+let lastVoteChoice = null;  // TODO: better with cookies
 let dbState;
 let errTrip = false;
 
@@ -70,10 +71,10 @@ function setButtons() {
     } else {
       $(`button${i}`).removeAttribute("disabled");
     }
+    $(`button${i}`).className = "";
 
     let dir = (dbState.last_dir - 1 + i) % 4;
     while (dir < 0) { dir = 4 + dir; }
-
     switch (dir) {
       case 0:
         char = "➡️"
@@ -93,18 +94,35 @@ function setButtons() {
         showError("Error: Invalid last move.\nIf this keeps repeating, contact me so I can fix this")
         break;
     }
-  
     $(`button${i}`).innerHTML = char;
+  }
+
+  console.log("buttons updated");
+
+  if (lastVoteChoice) {
+    $(`button${lastVoteChoice}`).innerHTML += "✅";
+    $(`button${lastVoteChoice}`).classList.add("chosen-vote");
   }
 }
 
-/** @param {Event} state  */ // annoying no typescript
+/** @param {Event} state  */ // this is here because JSDoc and not TS typing hints
 function sendVote(state) {
   let buttonId = state.target.id.split("button")[1];
   lastVoteTs = Date.now();
+  lastVoteChoice = buttonId
+
   $("button0").setAttribute("disabled", true);
   $("button1").setAttribute("disabled", true);
   $("button2").setAttribute("disabled", true);
+
+  set(ref(database, `votes/${buttonId}`), dbState.votes[buttonId] + 1)
+  .then(() => {
+    // do not add button editing, as the database would have been fetched right before this
+  }).catch(() => {
+    showError("Vote could not be sent!!!");
+    $(`button${buttonId}`).innerHTML += "🛑";
+    $(`button${buttonId}`).classList.add("chosen-vote");
+  });
 }
 
 function resetState() {
