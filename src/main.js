@@ -96,7 +96,7 @@ function setButtons() {
         showError("Error: Invalid last move")
         break;
     }
-    $(`button${i}`).innerHTML = char;
+    $(`button${i}`).innerHTML = `${dbState.votes[i]} ${char}`;
   }
 
   if (lastVoteChoice) {
