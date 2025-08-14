@@ -26,6 +26,7 @@
 
 .buttons {
     margin-top: 1ch;
+    user-select: none;
 }
 
 button {
@@ -37,14 +38,19 @@ button {
     padding: 15px;
 }
 
-button:hover {
+button:hover:not([disabled]) {
     background-color: gray;
 }
 
-button:active {
+button:active:not([disabled]) {
     background-color: white;
     color: black;
     transition: background-color 0s;
+}
+
+button:disabled {
+    color: gray;
+    background-color: darkred;
 }
 
 footer {

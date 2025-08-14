@@ -8,16 +8,18 @@
           holds the state of a row
     * last_dir: int (dir)  
       holds the last direction of movement
+    * last_move_ts: int  
+      holds the timestamp of the previous move
     * move: int  
       holds the current move of the "round"
     * next_ts: int  
-      holds the unix timestamp of when the next move should be played
+      holds the timestamp of when the next move should be played
     * snake_pos: array 
       holds the positions of snake body
-      * \[*]: str  
-        holds the position of a snake part in `x,y`
+      * \[*]: array  
+        holds the position of a snake part in `[x, y]`
     * start_ts: int  
-      holds the time of the start of the round as a unix timestamp
+      holds the timestamp of the start of the round
     * votes: object
         * [0] - [2]: int  
           holds the current number of votes for the corresponding direction choice (deterministic)
