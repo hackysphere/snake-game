@@ -18,6 +18,10 @@
     display: none
 }
 
+#next-move {
+    font-family: monospace;
+}
+
 .grid {
     background-color: gray;
     display: inline-block;

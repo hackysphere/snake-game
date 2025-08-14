@@ -49,7 +49,9 @@ function updateBoard() {
     content[pos[1]] = "😶";
     $(`row${pos[0]}`).innerHTML = content.join("");
 
-    setButtons();
+    setButtons(); // consider taking into this function? maybe??
+
+    $("next-move").innerHTML = (new Date(dbState.next_ts)).toLocaleTimeString();
 
     if (!errTrip) { $("error-message").setAttribute("hidden", true); }
   } catch (error) {
@@ -64,32 +66,32 @@ function setButtons() {
     let char = "";
 
     if (lastVoteTs > dbState.last_ts) {
-      char = "already voted";
       $(`button${i}`).setAttribute("disabled", true);
     } else {
       $(`button${i}`).removeAttribute("disabled");
-      let dir = (dbState.last_dir - 1 + i) % 4;
-      while (dir < 0) { dir = 4 + dir; }
+    }
 
-      switch (dir) {
-        case 0:
-          char = "➡️"
-          break;
-        case 1:
-          char = "⬇️"
-          break;
-        case 2:
-          char = "⬅️"
-          break;
-        case 3:
-          char = "⬆️"
-          break;
-        default:
-          char = "❓"
-          $(`button${i}`).setAttribute("disabled", true);
-          showError("Error: Invalid last move.\nIf this keeps repeating, contact me so I can fix this")
-          break;
-      }
+    let dir = (dbState.last_dir - 1 + i) % 4;
+    while (dir < 0) { dir = 4 + dir; }
+
+    switch (dir) {
+      case 0:
+        char = "➡️"
+        break;
+      case 1:
+        char = "⬇️"
+        break;
+      case 2:
+        char = "⬅️"
+        break;
+      case 3:
+        char = "⬆️"
+        break;
+      default:
+        char = "❓"
+        $(`button${i}`).setAttribute("disabled", true);
+        showError("Error: Invalid last move.\nIf this keeps repeating, contact me so I can fix this")
+        break;
     }
   
     $(`button${i}`).innerHTML = char;
@@ -115,7 +117,7 @@ function resetState() {
       "00000",
     ],
     "last_dir": 0,
-    "last_ts": -1,
+    "last_ts": 0,
     "move": 1,
     "next_ts": Date.now() + MOVEDELAY,
     "snake_pos": [
@@ -162,7 +164,7 @@ if (!false) {
       "00000",
     ],
     "last_dir": 0,
-    "last_ts": -1,
+    "last_ts": 0,
     "move": 1,
     "next_ts": Date.now() + MOVEDELAY,
     "snake_pos": [
@@ -178,7 +180,7 @@ if (!false) {
   };
   
   window.DEV_BLOCKEDSTATE = structuredClone(window.DEV_DEFAULTSTATE);
-  window.DEV_BLOCKEDSTATE.next_ts = -1;
+  window.DEV_BLOCKEDSTATE.last_ts = -1;
 
   window.DEV_GETVARS = () => {console.log(lastVoteTs); console.log(dbState);};
 
