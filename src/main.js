@@ -1,6 +1,6 @@
 // TODO: convert to typescript or something for better type *hinting* (not really checking)
-
-const $ = (id) => {return document.getElementById(id)};
+// NOTE TO SELF: grid length and width is hardcoded in DEFAULTSTATE and in newMove grid variable
+// also this file is just a big clump of things *_*
 const DEVMODE = !false // FIXME set to true
 
 import { initializeApp } from "firebase/app";
@@ -20,13 +20,12 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 
-
-// milliseconds due to Date.now()
+const $ = (id) => {return document.getElementById(id)};
 const MOVEDELAY = (() => {
+  // milliseconds due to Date.now()
   if (!DEVMODE) { return 120000; }
   else { return 15000;}
 })();
-
 let lastVoteTs = 0;         // FIXME use cookies to store these!!!
 let lastVoteChoice = null;  // FIXME use cookies to store these!!!
 let dbState;
@@ -93,8 +92,10 @@ function updateBoard() {
     }
 
     // snake head
-    let pos = dbState.snake_pos[0]
-    $(`row${pos[0]}`).innerHTML = stringCharReplace($(`row${pos[0]}`).innerHTML, "😶", pos[1]);
+    let pos_head = dbState.snake_pos[0]
+    let pos_tail = dbState.snake_pos.at(-1);
+    $(`row${pos_head[0]}`).innerHTML = stringCharReplace($(`row${pos_head[0]}`).innerHTML, "😶", pos_head[1]);
+    $(`row${pos_tail[0]}`).innerHTML = stringCharReplace($(`row${pos_tail[0]}`).innerHTML, "🟡", pos_tail[1]);
 
     setButtons(); // consider taking into this function? maybe??
 
@@ -346,7 +347,7 @@ if (DEVMODE) {
         window.DEV_CUSTOMMOVE(3);
         break;
       case "c":
-        // if you set this key to "r" or "R" reloading becomes hard :P
+        // if you set this key to "r" or "R" reloading the page becomes hard :P
         window.DEV_RESETSTATE();
         break;
       case "n":
