@@ -2,6 +2,8 @@
 
 ## json db
 * root: object
+    * apple_pos: int[]  
+      holds position of apple
     * grid: array 
       holds the current status of the grid
         * [0] - [4]: str (grid_row)  
@@ -18,14 +20,13 @@
       not required for proper game logic
     * snake_pos: array 
       holds the positions of snake body
-      * \[*]: array  
+      * \[*]: int[]
         holds the position of a snake part in `[x, y]`
     * start_ts: int  
       holds the timestamp of the start of the round  
       not required for game logic
-    * votes: object
-        * [0] - [2]: int  
-          holds the current number of votes for the corresponding direction choice (deterministic)
+    * votes: int[]
+      holds the current number of votes for the corresponding direction choice (deterministic)
 
 ## "types"
 ### grid_row
