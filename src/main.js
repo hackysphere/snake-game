@@ -1,5 +1,6 @@
 // TODO: convert to typescript or something for better type *hinting* (not really checking)
 // NOTE TO SELF: grid length and width is hardcoded in DEFAULTSTATE and in newMove grid variable
+// game also breaks if snake is at size 24 or 25...
 // also this file is just a big clump of things *_*
 const DEVMODE = !false // FIXME set to true
 
@@ -244,21 +245,12 @@ function newMove() {
       "00000"
     ]
 
-    // wall check, removing tail (if needed)
-    if (currentTile == "1") {
+    // wall check, setting apple (if needed), removing tail (if needed)
+    if (currentTile == "1") { // wall
       throw new Error("Game_WallHit");
       // TODO this actually doesn't work because the grid gets generated from a clean slate,
       // and the db has no information on where walls are...
-    } else if (!(currentTile == "2")) { // FIXME messy with apple setting piece of code
-      newState.snake_pos = newState.snake_pos.slice(0, -1);
-    }
-    // put snake on grid
-    for (let i = 0; i < newState.snake_pos.length; i++) {
-      grid[newState.snake_pos[i][0]] = stringCharReplace(grid[newState.snake_pos[i][0]], "3", newState.snake_pos[i][1]);
-    }
-
-    // setting new apple position (if needed)
-    if (currentTile == "2") {
+    } else if (currentTile == "2") { // apple
       let validPos = true;
       do {
         validPos = true;
@@ -278,12 +270,19 @@ function newMove() {
 
         newState.apple_pos = newPlacement;
       } while (!validPos);
+    } else {
+      newState.snake_pos = newState.snake_pos.slice(0, -1);
     }
+    // put snake without head on grid
+    for (let i = 0; i < newState.snake_pos.length; i++) {
+      grid[newState.snake_pos[i][0]] = stringCharReplace(grid[newState.snake_pos[i][0]], "3", newState.snake_pos[i][1]);
+    }
+    
     // put apple on grid
     grid[newState.apple_pos[0]] = stringCharReplace(grid[newState.apple_pos[0]], "2", newState.apple_pos[1]);
 
     // check if hitting self from NEW state
-    if (["3"].includes(grid[pos[0]][pos[1]])) {
+    if (grid[pos[0]][pos[1]] == "3") {
       throw new Error("Game_WallHit");
     }
 
