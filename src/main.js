@@ -2,7 +2,7 @@
 // NOTE TO SELF: grid length and width is hardcoded in DEFAULTSTATE and in newMove grid variable
 // game also breaks if snake is at size 24 or 25...
 // also this file is just a big clump of things *_*
-const DEVMODE = !false // FIXME set to true
+const DEVMODE = !false // FIXME remove ! to make this false
 
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, child, set, get, onValue, update, increment } from "firebase/database";
@@ -113,7 +113,7 @@ function setButtons() {
   for (let i = 0; i < 3; i++) {
     let char = "";
 
-    if (lastVoteTs > dbState.last_ts) {
+    if (lastVoteTs > dbState.last_ts && !DEVMODE) {
       $(`button${i}`).setAttribute("disabled", true);
     } else {
       $(`button${i}`).removeAttribute("disabled");
@@ -196,11 +196,11 @@ function newMove() {
       }
     }
     // set "default" to middle option/same path
-    if (tmpState.votes[voteIndex] == tmpState.votes[1]) {
+    if (tmpState.votes[voteIndex] === tmpState.votes[1]) {
       voteIndex = 1;
     }
-    if (tmpState.votes[0] === 0 && tmpState.votes[0] === tmpState.votes[1] === tmpState.votes[2]) {
-      // TODO skip move?? or something else
+    if (tmpState.votes.every(x => x == 0)) {
+      throw new Error("Game_NoVotes");
     }
     let dir = (tmpState.last_dir - 1 + voteIndex) % 4;
     while (dir < 0) { dir = 4 + dir; }
@@ -297,6 +297,14 @@ function newMove() {
   } catch (err) {
     if (err.message === "Game_WallHit") {
       set(ref(database), DEFAULTSTATE())
+    } else if (err.message === "Game_NoVotes") {
+      let tmpState = structuredClone(dbState);
+      tmpState.last_ts = Date.now();
+      tmpState.move += 1;
+      tmpState.next_ts = Date.now() + MOVEDELAY;
+      tmpState.votes = [0, 0, 0];
+
+      set(ref(database), tmpState);
     } else {
       console.error(err);
     }
@@ -364,7 +372,7 @@ if (DEVMODE) {
   window.DEV_RESETTIME = () => {set(ref(database, "last_ts"), Date.now())}
   window.DEV_SYNCSTATE = () => {get(ref(database)).then((state) => {dbState = state.val(); updateBoard();})}
   window.DEV_BYPASSLOCK = () => {lastVoteTs = 0; updateBoard();}
-  window.DEV_CUSTOMMOVE = (dir) => {dbState.last_dir = dir; newMove()}
+  window.DEV_CUSTOMMOVE = (dir) => {dbState.last_dir = dir; dbState.votes[1] = 1e100; newMove();}
   window.DEV_DEFAULTSTATE = () => DEFAULTSTATE();
   window.DEV_NEWMOVE = () => newMove();
 
