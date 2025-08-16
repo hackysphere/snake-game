@@ -2,7 +2,8 @@
 // NOTE TO SELF: grid length and width is hardcoded in DEFAULTSTATE and in newMove grid variable
 // game also breaks if snake is at size 24 or 25...
 // also this file is just a big clump of things *_*
-const DEVMODE = !false // FIXME remove ! to make this false
+const DEVMODE = !false   // FIXME remove ! to make this false
+const MULTIVOTE = false // FIXME remove ! to make this false
 
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, child, set, get, onValue, update, increment } from "firebase/database";
@@ -27,10 +28,11 @@ const MOVEDELAY = (() => {
   if (!DEVMODE) { return 120000; }
   else { return 15000;}
 })();
-let lastVoteTs = 0;         // FIXME use cookies to store these!!!
-let lastVoteChoice = null;  // FIXME use cookies to store these!!!
+let lastVoteTs;
+let lastVoteChoice;
 let dbState;
 let errTrip = false;
+
 
 const DEFAULTSTATE = (() => { return {
   "apple_pos": [2, 3],
@@ -82,6 +84,14 @@ function showError(message) {
   console.error(message);
 }
 
+/**
+ * Updates/sets the stored values for current vote status in browser storage
+ */
+function updateStorage() {
+  localStorage.setItem("vote_lastTs", lastVoteTs);
+  localStorage.setItem("vote_lastChoice", lastVoteChoice);
+}
+
 function updateBoard() {
   errTrip = false;
   try {
@@ -113,7 +123,7 @@ function setButtons() {
   for (let i = 0; i < 3; i++) {
     let char = "";
 
-    if (lastVoteTs > dbState.last_ts && !DEVMODE) {
+    if (lastVoteTs > dbState.last_ts && !MULTIVOTE) {
       $(`button${i}`).setAttribute("disabled", true);
     } else {
       $(`button${i}`).removeAttribute("disabled");
@@ -156,6 +166,7 @@ function sendVote(buttonState) {
   let buttonId = buttonState.target.id.split("button")[1];
   lastVoteTs = Date.now();
   lastVoteChoice = buttonId
+  updateStorage();
 
   $("button0").setAttribute("disabled", true);
   $("button1").setAttribute("disabled", true);
@@ -312,6 +323,15 @@ function newMove() {
 }
 
 
+// set up stored values
+if (!localStorage.getItem("vote_lastTs") || !localStorage.getItem("vote_lastChoice")) {
+  lastVoteTs = 0;
+  lastVoteChoice = null;
+} else {
+  lastVoteTs = localStorage.getItem("vote_lastTs");
+  lastVoteChoice = localStorage.getItem("vote_lastChoice");
+}
+
 // firefox ignores the default attributes if the page is not hard-reloaded
 $("button0").setAttribute("disabled", true);
 $("button1").setAttribute("disabled", true);
@@ -374,7 +394,6 @@ if (DEVMODE) {
   window.DEV_BYPASSLOCK = () => {lastVoteTs = 0; updateBoard();}
   window.DEV_CUSTOMMOVE = (dir) => {dbState.last_dir = dir; dbState.votes[1] = 1e100; newMove();}
   window.DEV_DEFAULTSTATE = () => DEFAULTSTATE();
-  window.DEV_NEWMOVE = () => newMove();
 
   window.$ = $;
 }
