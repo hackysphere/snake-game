@@ -2,8 +2,16 @@
 // NOTE TO SELF: grid length and width is hardcoded in DEFAULTSTATE and in newMove grid variable
 // game also breaks if snake is at size 24 or 25...
 // also this file is just a big clump of things *_*
-const DEVMODE = !false   // FIXME remove ! to make this false
-const MULTIVOTE = false // FIXME remove ! to make this false
+
+// these will always be disabled in production due to vite build states
+const $ = (id) => {return document.getElementById(id)};
+const DEVMODE = import.meta.env.DEV && !false
+const MULTIVOTE = import.meta.env.DEV && false
+if (import.meta.env.DEV) {
+  $("dev-build").removeAttribute("hidden");
+  if (DEVMODE) { $("dev-build-data").innerHTML += "DEVMODE "; }
+  if (MULTIVOTE) { $("dev-build-data").innerHTML += "MULTIVOTE "; }
+}
 
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, child, set, get, onValue, update, increment } from "firebase/database";
@@ -22,10 +30,10 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 
-const $ = (id) => {return document.getElementById(id)};
+
 const MOVEDELAY = (() => {
   // milliseconds due to Date.now()
-  if (!DEVMODE) { return 120000; }
+  if (!DEVMODE) { return 60000; }
   else { return 15000;}
 })();
 let lastVoteTs;
@@ -111,6 +119,7 @@ function updateBoard() {
     setButtons(); // consider taking into this function? maybe??
 
     $("next-move").innerHTML = (new Date(dbState.next_ts)).toLocaleTimeString();
+    $("current-move").innerHTML = dbState.move;
 
     if (!errTrip) { $("error-message").setAttribute("hidden", true); }
   } catch (error) {
@@ -256,6 +265,12 @@ function newMove() {
       "00000"
     ]
 
+    // check if game has been won
+    // length check is 1 less than total grid area
+    if (tmpState.snake_pos.length == 24 && currentTile == "2") {
+      throw new Error("Game_GameWon");
+    }
+
     // wall check, setting apple (if needed), removing tail (if needed)
     if (currentTile == "1") { // wall
       throw new Error("Game_WallHit");
@@ -316,6 +331,21 @@ function newMove() {
       tmpState.votes = [0, 0, 0];
 
       set(ref(database), tmpState);
+    } else if (err.message == "Game_GameWon") {
+      let tmpState = DEFAULTSTATE();
+      tmpState.grid = [
+        "✅✅✅✅✅",
+        "11111",
+        "13331",
+        "11111",
+        "✅✅✅✅✅"
+      ];
+      tmpState.apple_pos = [-1, -1];
+      tmpState.snake_pos = [[2, 3], [2, 2], [2, 1]];
+      tmpState.move = dbState.move + 1;
+      
+      set(ref(database), tmpState);
+      setTimeout(() => showError("you have won the game!!!"), 1000);
     } else {
       console.error(err);
     }
