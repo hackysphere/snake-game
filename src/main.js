@@ -17,13 +17,13 @@ import { initializeApp } from "firebase/app";
 import { getDatabase, ref, child, set, get, onValue, update, increment } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "***REMOVED***",
-  authDomain: "***REMOVED***",
-  projectId: "***REMOVED***",
-  storageBucket: "***REMOVED***.firebasestorage.app",
-  messagingSenderId: "***REMOVED***",
-  appId: "1:***REMOVED***:web:daa763b3039d0a414c1a9b",
-  databaseURL: "https://***REMOVED***-default-rtdb.firebaseio.com",
+  apiKey: import.meta.env.VITE_firebase_apiKey,
+  authDomain: import.meta.env.VITE_firebase_authDomain,
+  projectId: import.meta.env.VITE_firebase_projectId,
+  storageBucket: import.meta.env.VITE_firebase_storageBucket,
+  messagingSenderId: import.meta.env.VITE_firebase_messagingSenderId,
+  appId: import.meta.env.VITE_firebase_appId,
+  databaseURL: import.meta.env.VITE_firebase_databaseURL,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -36,8 +36,8 @@ const MOVEDELAY = (() => {
   if (!DEVMODE) { return 60000; }
   else { return 15000;}
 })();
-let lastVoteTs;
-let lastVoteChoice;
+let lastVoteTs = localStorage.getItem("vote_lastTs") ?? 0;
+let lastVoteChoice = localStorage.getItem("vote_lastChoice") ?? null;
 let dbState;
 let errTrip = false;
 
@@ -208,6 +208,11 @@ function newMove() {
       "votes": [0, 0, 0]
     }
 
+    // reset game if this was the "game win" "move"
+    if (tmpState.grid[0][0] == "✅") {
+      throw new Error("Game_WallHit");
+    }
+
     // winning vote and position calculation
     let voteIndex = 0;
     for (let i = 1; i < 3; i++) {
@@ -345,22 +350,13 @@ function newMove() {
       tmpState.move = dbState.move + 1;
       
       set(ref(database), tmpState);
-      setTimeout(() => showError("you have won the game!!!"), 1000);
+      setTimeout(() => showError("the game has been won!!!"), 1000);
     } else {
       console.error(err);
     }
   }
 }
 
-
-// set up stored values
-if (!localStorage.getItem("vote_lastTs") || !localStorage.getItem("vote_lastChoice")) {
-  lastVoteTs = 0;
-  lastVoteChoice = null;
-} else {
-  lastVoteTs = localStorage.getItem("vote_lastTs");
-  lastVoteChoice = localStorage.getItem("vote_lastChoice");
-}
 
 // firefox ignores the default attributes if the page is not hard-reloaded
 $("button0").setAttribute("disabled", true);
