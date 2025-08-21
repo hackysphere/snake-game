@@ -1,10 +1,12 @@
 // TODO: convert to typescript or something for better type *hinting* (not really checking)
-// NOTE TO SELF: grid length and width is hardcoded in DEFAULTSTATE and in newMove grid variable
+// NOTE TO SELF: grid length and width is hardcoded in newMove grid variable
 // game also breaks if snake is at size 24 or 25...
 // also this file is just a big clump of things *_*
 
-// these will always be disabled in production due to vite build states
+import * as CONST from "./constants.js";
 const $ = (id) => {return document.getElementById(id)};
+
+// these will always be disabled in production due to vite build states
 const DEVMODE = import.meta.env.DEV && !false
 const MULTIVOTE = import.meta.env.DEV && false
 if (import.meta.env.DEV) {
@@ -33,35 +35,14 @@ const database = getDatabase(app);
 
 const MOVEDELAY = (() => {
   // milliseconds due to Date.now()
-  if (!DEVMODE) { return 60000; }
-  else { return 15000;}
+  if (!DEVMODE) { return CONST.MOVEDELAY; }
+  else { return CONST.MOVEDELAY_DEV;}
 })();
 let lastVoteTs = localStorage.getItem("vote_lastTs") ?? 0;
 let lastVoteChoice = localStorage.getItem("vote_lastChoice") ?? null;
 let dbState;
 let errTrip = false;
 
-
-const DEFAULTSTATE = (() => { return {
-  "apple_pos": [2, 3],
-  "grid": [
-    "00000",
-    "00000",
-    "33020",
-    "00000",
-    "00000",
-  ],
-  "last_dir": 0,
-  "last_ts": 0,
-  "move": 1,
-  "next_ts": Date.now() + MOVEDELAY, // pageload var
-  "snake_pos": [
-    [2, 1],
-    [2, 0],
-  ],
-  "start_ts": Date.now(), // pageload var
-  "votes": [0, 0, 0]
-}});
 
 /**
  * Replaces `char` at `location` in string `original`
@@ -327,7 +308,7 @@ function newMove() {
     set(ref(database), newState);
   } catch (err) {
     if (err.message === "Game_WallHit") {
-      set(ref(database), DEFAULTSTATE())
+      set(ref(database), CONST.DEFAULTSTATE())
     } else if (err.message === "Game_NoVotes") {
       let tmpState = structuredClone(dbState);
       tmpState.last_ts = Date.now();
@@ -337,7 +318,7 @@ function newMove() {
 
       set(ref(database), tmpState);
     } else if (err.message == "Game_GameWon") {
-      let tmpState = DEFAULTSTATE();
+      let tmpState = CONST.DEFAULTSTATE();
       tmpState.grid = [
         "✅✅✅✅✅",
         "11111",
@@ -409,17 +390,17 @@ if (DEVMODE) {
     }
   });
 
-  window.DEV_BLOCKEDSTATE = DEFAULTSTATE();
+  window.DEV_BLOCKEDSTATE = CONST.DEFAULTSTATE();
   window.DEV_BLOCKEDSTATE.last_ts = -1;
 
   window.DEV_GETVARS = () => {return [lastVoteTs, dbState]};
   window.DEV_PUSHSTATE = content => set(ref(database), content);
-  window.DEV_RESETSTATE = () => window.DEV_PUSHSTATE(DEFAULTSTATE());
+  window.DEV_RESETSTATE = () => window.DEV_PUSHSTATE(CONST.DEFAULTSTATE());
   window.DEV_RESETTIME = () => {set(ref(database, "last_ts"), Date.now())}
   window.DEV_SYNCSTATE = () => {get(ref(database)).then((state) => {dbState = state.val(); updateBoard();})}
   window.DEV_BYPASSLOCK = () => {lastVoteTs = 0; updateBoard();}
   window.DEV_CUSTOMMOVE = (dir) => {dbState.last_dir = dir; dbState.votes[1] = 1e100; newMove();}
-  window.DEV_DEFAULTSTATE = () => DEFAULTSTATE();
+  window.DEV_DEFAULTSTATE = () => CONST.DEFAULTSTATE();
 
   window.$ = $;
 }

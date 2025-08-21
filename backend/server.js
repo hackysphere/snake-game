@@ -1,4 +1,4 @@
-// BUG: some of the shared variables (ex: default state) should be imported in both JS files as a seperate module!!!
+import * as CONST from "../src/constants.js"
 import express from 'express';
 
 const DEVMODE = (process.env.NODE_ENV === "development");
@@ -10,30 +10,10 @@ const LISTENPORT = (() => {
 // const MOVEDELAY = game_MOVEDELAY;
 const MOVEDELAY = (() => {
   // milliseconds due to Date.now()
-  if (!DEVMODE) { return 60000; }
-  else { return 15000; }
+  if (!DEVMODE) { return CONST.MOVEDELAY; }
+  else { return CONST.MOVEDELAY_DEV; }
 })();
-// let gameState = game_DEFAULTSTATE();
-let gameState = {
-  "apple_pos": [2, 3],
-  "grid": [
-    "00000",
-    "00000",
-    "33020",
-    "00000",
-    "00000",
-  ],
-  "last_dir": 0,
-  "last_ts": 0,
-  "move": 1,
-  "next_ts": Date.now() + MOVEDELAY, // pageload var
-  "snake_pos": [
-    [2, 1],
-    [2, 0],
-  ],
-  "start_ts": Date.now(), // pageload var
-  "votes": [0, 0, 0]
-};
+let gameState = CONST.DEFAULTSTATE();
 
 const app = express();
 
@@ -58,4 +38,7 @@ for (let i = 0; i < 3; i++) {
   });
 }
 
-app.listen(LISTENPORT, () => {console.log("Server is up!")});
+app.listen(LISTENPORT, (err) => {
+  if (!err) { console.log("Server is up!"); }
+  else { console.error(err); };
+});
