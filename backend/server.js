@@ -16,6 +16,10 @@ const MOVEDELAY = (() => {
 let gameState = CONST.DEFAULTSTATE();
 
 const app = express();
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  next();
+});
 
 if (DEVMODE) {
   app.get("/api", (req, res) => {

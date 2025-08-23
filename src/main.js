@@ -16,7 +16,7 @@ if (import.meta.env.DEV) {
 }
 
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, child, set, get, onValue, update, increment } from "firebase/database";
+import { getDatabase, ref, set, get, update, increment } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_firebase_apiKey,
@@ -162,9 +162,7 @@ function sendVote(buttonState) {
   $("button1").setAttribute("disabled", true);
   $("button2").setAttribute("disabled", true);
 
-  let updates = {}
-  updates[`votes/${buttonId}`] = increment(1)
-  update(ref(database), updates)
+  fetch(CONST.SERVERURL + `/api/votes/${buttonId}`, { method: "POST" })
   .then(() => {
     // do not add button editing, as the database would have been fetched right before this
     // (and button would have been consqquently edited)
@@ -345,10 +343,14 @@ $("button1").setAttribute("disabled", true);
 $("button2").setAttribute("disabled", true);
 
 // database connection
-onValue(ref(database), snapshot => {
-  dbState = snapshot.val();
-  updateBoard(snapshot.val());
-});
+setInterval(() => {
+  fetch(CONST.SERVERURL + "/api/state")
+  .then((res) => res.json())
+  .then((json_res) => {
+    dbState = json_res;
+    updateBoard(dbState);
+  });
+}, 1000);
 
 // wiring up buttons
 $("button0").addEventListener("click", sendVote);

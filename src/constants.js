@@ -23,3 +23,6 @@ export const DEFAULTSTATE = (() => { return {
   "start_ts": Date.now(),
   "votes": [0, 0, 0]
 }});
+
+// move to .env file?
+export const SERVERURL = "http://localhost:8080";
