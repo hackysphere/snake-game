@@ -2,6 +2,9 @@
 
 ## json db
 * root: object
+    * game_id: str
+      holds the current game id (just a random UUID, reset on each server cycle)
+
     * apple_pos: int[]  
       holds position of apple
     * grid: array 
