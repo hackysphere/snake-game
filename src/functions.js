@@ -21,6 +21,7 @@ export function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
+// FIXME: this is very very messy
 export function newMove(state) {
   try {
     // set up local db copy and base of new game state
@@ -91,6 +92,7 @@ export function newMove(state) {
     
 
     // make new grid
+    // FIXME: this grid is hardcoded
     let grid = [
       "00000",
       "00000",
@@ -151,7 +153,8 @@ export function newMove(state) {
     newState.snake_pos.unshift(pos);
     grid[pos[0]] = stringCharReplace(grid[pos[0]], "3", pos[1]);
 
-    // publish
+    
+    // save the grid
     newState.grid = grid;
     return newState;
   } catch (err) {

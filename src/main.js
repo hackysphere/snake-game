@@ -1,5 +1,4 @@
 // TODO: convert to typescript or something for better type *hinting* (not really checking)
-// game also breaks if snake is at size 24 or 25...
 // also this file is just a big clump of things *_*
 
 import * as CONST from "./constants.js";
@@ -14,11 +13,17 @@ if (import.meta.env.DEV) {
   if (DEVMODE) { $("dev-build-data").innerHTML += "DEVMODE "; }
   if (MULTIVOTE) { $("dev-build-data").innerHTML += "MULTIVOTE "; }
 }
+const SERVERURL = DEVMODE ? "http://localhost:8080" : CONST.SERVERURL;
 
-
+/**
+ * Variables to prevent easy doublevoting
+ * Must be also set in updateStorage and sendVote
+ * There is probably a better way to do this
+ */
 let lastVoteTs = localStorage.getItem("vote_lastTs") ?? 0;
 let lastVoteChoice = localStorage.getItem("vote_lastChoice") ?? null;
 let lastGameId = localStorage.getItem("lastGameId") ?? null;
+
 let dbState;
 let errTrip = false;
 
@@ -33,6 +38,7 @@ function showError(message) {
 
 /**
  * Updates/sets the stored values for current vote status in browser storage
+ * This is only called when voting for a move
  */
 function updateStorage() {
   localStorage.setItem("vote_lastTs", lastVoteTs);
@@ -72,7 +78,7 @@ function setButtons() {
   for (let i = 0; i < 3; i++) {
     let char = "";
 
-    if (lastVoteTs > dbState.last_ts && lastGameId == dbState.game_id && !MULTIVOTE) {
+    if (lastVoteTs > dbState.last_ts && lastGameId === dbState.game_id && !MULTIVOTE) {
       $(`button${i}`).setAttribute("disabled", true);
     } else {
       $(`button${i}`).removeAttribute("disabled");
@@ -80,6 +86,7 @@ function setButtons() {
     }
     $(`button${i}`).className = "";
 
+    // FIXME: this code is a mess
     let dir = (dbState.last_dir - 1 + i) % 4;
     while (dir < 0) { dir = 4 + dir; }
     switch (dir) {
@@ -122,10 +129,10 @@ function sendVote(buttonState) {
   $("button1").setAttribute("disabled", true);
   $("button2").setAttribute("disabled", true);
 
-  fetch(CONST.SERVERURL + `/api/votes/${buttonId}`, { method: "POST" })
+  fetch(SERVERURL + `/api/votes/${buttonId}`, { method: "POST" })
   .then(() => {
     // do not add button editing, as the database would have been fetched right before this
-    // (and button would have been consqquently edited)
+    // (and button would have been consequently edited)
   }).catch((error) => {
     showError("Vote could not be sent!!!");
     $(`button${buttonId}`).innerHTML += "🛑";
@@ -139,9 +146,14 @@ $("button0").setAttribute("disabled", true);
 $("button1").setAttribute("disabled", true);
 $("button2").setAttribute("disabled", true);
 
+// wiring up buttons
+$("button0").addEventListener("click", sendVote);
+$("button1").addEventListener("click", sendVote);
+$("button2").addEventListener("click", sendVote);
+
 // database connection
 setInterval(() => {
-  fetch(CONST.SERVERURL + "/api/state")
+  fetch(SERVERURL + "/api/state")
   .then((res) => res.json())
   .then((json_res) => {
     dbState = json_res;
@@ -149,57 +161,54 @@ setInterval(() => {
   });
 }, 1000);
 
-// wiring up buttons
-$("button0").addEventListener("click", sendVote);
-$("button1").addEventListener("click", sendVote);
-$("button2").addEventListener("click", sendVote);
-
-// // new move
-// setInterval(() => {
-//   if (Date.now() > dbState?.next_ts) {
-//     newMove();
-//   }
-// }, randomInt(5000, 10000));
-
-
 
 // dev, very unsafe
 if (DEVMODE) {
-  // addEventListener("keydown", (e) => {
-  //   switch (e.key) {
-  //     case "ArrowRight":
-  //       window.DEV_CUSTOMMOVE(0);
-  //       break;
-  //     case "ArrowDown":
-  //       window.DEV_CUSTOMMOVE(1);
-  //       break;
-  //     case "ArrowLeft":
-  //       window.DEV_CUSTOMMOVE(2);
-  //       break;
-  //     case "ArrowUp":
-  //       window.DEV_CUSTOMMOVE(3);
-  //       break;
-  //     case "c":
-  //       // if you set this key to "r" or "R" reloading the page becomes hard :P
-  //       window.DEV_RESETSTATE();
-  //       break;
-  //     // case "n":
-  //     //   newMove();
-  //     //   break;
-  //   }
-  // });
+  addEventListener("keydown", (e) => {
+    switch (e.key) {
+      case "ArrowRight":
+        window.DEV_CUSTOMMOVE(0);
+        break;
+      case "ArrowDown":
+        window.DEV_CUSTOMMOVE(1);
+        break;
+      case "ArrowLeft":
+        window.DEV_CUSTOMMOVE(2);
+        break;
+      case "ArrowUp":
+        window.DEV_CUSTOMMOVE(3);
+        break;
+      case "c":
+        // if you set this key to "r" or "R" reloading the page becomes hard :P
+        window.DEV_RESETSTATE();
+        break;
+      case "n":
+        window.DEV_NEXTMOVE();
+        break;
+    }
+  });
 
   window.DEV_BLOCKEDSTATE = CONST.DEFAULTSTATE();
   window.DEV_BLOCKEDSTATE.last_ts = -1;
 
   window.DEV_GETVARS = () => {return [lastVoteTs, dbState]};
-  // window.DEV_PUSHSTATE = content => set(ref(database), content);
-  // window.DEV_RESETSTATE = () => window.DEV_PUSHSTATE(CONST.DEFAULTSTATE());
-  // window.DEV_RESETTIME = () => {set(ref(database, "last_ts"), Date.now())}
-  window.DEV_SYNCSTATE = () => {get(ref(database)).then((state) => {dbState = state.val(); updateBoard();})}
-  window.DEV_BYPASSLOCK = () => {lastVoteTs = 0; updateBoard();}
-  // window.DEV_CUSTOMMOVE = (dir) => {dbState.last_dir = dir; dbState.votes[1] = 1e100; newMove();}
+  window.DEV_RESETSTATE = () => fetch(SERVERURL + "/api/devel/newgame");
+  window.DEV_BYPASSLOCK = () => {lastVoteTs = 0; updateBoard();};
+  window.DEV_CUSTOMMOVE = (dir) => {
+    let voteindex;
+    if (dbState.last_dir === dir) {
+      voteindex = 1;
+    } else if (((dbState.last_dir + 1 + 4) % 4) === dir) {
+      voteindex = 2;
+    } else if (((dbState.last_dir - 1 + 4) % 4) === dir) {
+      voteindex = 0;
+    } else {
+      return;
+    }
+    fetch(SERVERURL + `/api/votes/${voteindex}`, { method: "POST" });
+  };
   window.DEV_DEFAULTSTATE = () => CONST.DEFAULTSTATE();
+  window.DEV_NEXTMOVE = () => fetch(SERVERURL + "/api/devel/newtick")
 
   window.$ = $;
 }

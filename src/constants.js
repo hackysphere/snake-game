@@ -1,10 +1,14 @@
-// NOTE TO SELF: grid length and width is hardcoded in DEFAULTSTATE
+// NOTE TO SELF: grid length and width will always be set to 5x5 due to functions.js newMove
+
+// these are only used in production, local URLs are used in development
+export const CLIENTURL = "https://snake.hcks.dev";
+export const SERVERURL = "https://api.snake.hcks.dev";
 
 export const MOVEDELAY = 60000;
 export const MOVEDELAY_DEV = 15000;
 
 export const DEFAULTSTATE = (() => { return {
-  "game_id": null,
+  "game_id": crypto.randomUUID(),
 
   "apple_pos": [2, 3],
   "grid": [
@@ -26,50 +30,25 @@ export const DEFAULTSTATE = (() => { return {
   "votes": [0, 0, 0]
 }});
 
-export const WINSTATE = (() => { return {
-  "game_id": null,
-
-  "apple_pos": [2, 4],
-  "grid": [
+export const WINSTATE = (() => {
+  let state = DEFAULTSTATE();
+  state.apple_pos = [2, 4];
+  state.grid = [
     "33332",
     "33333",
     "33333",
     "33333",
     "33333",
-  ],
-  "last_dir": 0,
-  "last_ts": 0,
-  "move": 1,
-  "next_ts": Date.now() + 2000,
-  "snake_pos": [
-    [0, 3],
-    [0, 2],
-    [0, 1],
-    [0, 0],
-    [1, 0],
-    [1, 1],
-    [1, 2],
-    [1, 3],
-    [1, 4],
-    [2, 4],
-    [2, 3],
-    [2, 2],
-    [2, 1],
-    [2, 0],
-    [3, 0],
-    [3, 1],
-    [3, 2],
-    [3, 3],
-    [3, 4],
-    [4, 4],
-    [4, 3],
-    [4, 2],
-    [4, 1],
-    [4, 0]
-  ],
-  "start_ts": Date.now(),
-  "votes": [0, 1, 0]
-}});
+  ];
 
-// move to .env file?
-export const SERVERURL = "http://localhost:8080";
+  state.snake_pos = [];
+  for (let x = 0; x < 5; x++) {
+    for (let y = 0; y < 5; y++) {
+      if (x !== 0 || y !== 4) {
+        state.snake_pos.push([x, y]);
+      }
+    }
+  }
+
+  return state;
+});

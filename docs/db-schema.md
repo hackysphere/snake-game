@@ -2,8 +2,8 @@
 
 ## json db
 * root: object
-    * game_id: str
-      holds the current game id (just a random UUID, reset on each server cycle)
+    * game_id: str  
+      holds the current game id (just a random UUID, reset on each game cycle)
 
     * apple_pos: int[]  
       holds position of apple
@@ -35,13 +35,13 @@
 ### grid_row
 string of int, can be:
 * 0: empty square
-* 1: wall
+* 1: wall (currently unused)
 * 2: apple
 * 3: snake
 
 ### last_dir
 int, can be:
-* 0: right / east
-* 1: down  / south
-* 2: left  / west
-* 3: up    / north
+* 0: right
+* 1: down
+* 2: left
+* 3: up

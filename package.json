@@ -1,5 +1,5 @@
 {
-  "name": "snake-game-firebase",
+  "name": "snake-game",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -15,7 +15,6 @@
     "vite": "^7.1.2"
   },
   "dependencies": {
-    "express": "^5.1.0",
-    "firebase": "^12.4.0"
+    "express": "^5.1.0"
   }
 }
