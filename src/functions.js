@@ -51,7 +51,7 @@ export function newMove(state) {
       }
     }
     // set "default" to middle option/same path
-    if (tmpState.votes[voteIndex] === tmpState.votes[1]) {
+    if ( tmpState.votes.filter(val => val !== tmpState.votes[voteIndex]).length !== 2 ) {
       voteIndex = 1;
     }
     if (tmpState.votes.every(x => x == 0)) {

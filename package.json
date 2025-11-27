@@ -11,8 +11,8 @@
     "serve": "NODE_ENV=production node backend/server.js"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3",
-    "vite": "^7.1.2"
+    "@types/express": "^5.0.5",
+    "vite": "^7.2.4"
   },
   "dependencies": {
     "express": "^5.1.0"
