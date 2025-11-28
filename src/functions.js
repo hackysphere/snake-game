@@ -110,8 +110,8 @@ export function newMove(state) {
     // wall check, setting apple (if needed), removing tail (if needed)
     if (currentTile == "1") { // wall
       throw new Error("Game_WallHit");
-      // TODO this actually doesn't work because the grid gets generated from a clean slate,
-      // and the db has no information on where walls are...
+      // this actually doesn't work as of 68a7c415, as the state doesn't have the wall tile yet...
+      // keeping this in for easier future integration (or other "features")
     } else if (currentTile == "2") { // apple
       let validPos = true;
       do {
@@ -182,7 +182,6 @@ export function newMove(state) {
       tmpState.move = state.move + 1;
       
       return tmpState;
-      // setTimeout(() => showError("the game has been won!!!"), 1000); // TODO migrate this to the client code
     } else {
       console.error(err);
     }

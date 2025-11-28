@@ -57,7 +57,7 @@ function updateBoard() {
     }
 
     // snake head
-    let pos_head = dbState.snake_pos[0]
+    let pos_head = dbState.snake_pos[0];
     let pos_tail = dbState.snake_pos.at(-1);
     $(`row${pos_head[0]}`).innerHTML = funct.stringCharReplace($(`row${pos_head[0]}`).innerHTML, "😶", pos_head[1]);
     $(`row${pos_tail[0]}`).innerHTML = funct.stringCharReplace($(`row${pos_tail[0]}`).innerHTML, "🟡", pos_tail[1]);
@@ -66,6 +66,8 @@ function updateBoard() {
 
     $("next-move").innerHTML = (new Date(dbState.next_ts)).toLocaleTimeString();
     $("current-move").innerHTML = dbState.move;
+
+    if (dbState.grid[0][0] === "✅") { showError("the game has been won!!!"); }
 
     if (!errTrip) { $("error-message").setAttribute("hidden", true); }
   } catch (error) {
