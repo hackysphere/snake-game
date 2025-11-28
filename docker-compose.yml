@@ -1,0 +1,6 @@
+services:
+  snake-game:
+    container_name: snake-game
+    build: .
+    ports:
+      - 80:80
