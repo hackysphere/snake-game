@@ -21,6 +21,19 @@ export function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
+/**
+ * Get the new direction after changing the last direction (optionally with offset)
+ * @param {number} lastDir Last direction of movement
+ * @param {number} change Change from previous direction
+ * @param {number?} offset Optional offset to use as base direction (or else -1)
+ * @returns new direction
+ */
+export function getDirWithOffset(lastDir, change, offset=-1) {
+  let noBoundDir = lastDir + offset + change + 4;
+  let boundedDir = noBoundDir % 4;
+  return boundedDir;
+}
+
 // FIXME: this is very very messy
 export function newMove(state, height=5, width=5) {
   try {
@@ -57,8 +70,7 @@ export function newMove(state, height=5, width=5) {
     if (tmpState.votes.every(x => x == 0)) {
       throw new Error("Game_NoVotes");
     }
-    let dir = (tmpState.last_dir - 1 + voteIndex) % 4;
-    while (dir < 0) { dir = 4 + dir; }
+    let dir = getDirWithOffset(tmpState.last_dir, voteIndex);
     newState.last_dir = dir;
 
     // setting new snake HEAD position to be checked and storing position's tile

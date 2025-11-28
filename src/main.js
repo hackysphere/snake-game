@@ -88,9 +88,7 @@ function setButtons() {
     }
     $(`button${i}`).className = "";
 
-    // first line finds the direction without accounting for bounds, second line accounts for bounds
-    let dirArbitrary = (dbState.last_dir - 1 + i)
-    let dir = (dirArbitrary + 4) % 4;
+    let dir = funct.getDirWithOffset(dbState.last_dir, i);
 
     switch (dir) {
       case 0:
@@ -108,7 +106,7 @@ function setButtons() {
       default:
         char = "❓"
         $(`button${i}`).setAttribute("disabled", true);
-        showError("Error: Invalid last move")
+        showError("Error: Invalid last move");
         break;
     }
     $(`button${i}`).innerHTML = `${dbState.votes[i]} ${char}`;
