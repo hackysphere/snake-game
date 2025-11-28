@@ -88,9 +88,10 @@ function setButtons() {
     }
     $(`button${i}`).className = "";
 
-    // FIXME: this code is a mess
-    let dir = (dbState.last_dir - 1 + i) % 4;
-    while (dir < 0) { dir = 4 + dir; }
+    // first line finds the direction without accounting for bounds, second line accounts for bounds
+    let dirArbitrary = (dbState.last_dir - 1 + i)
+    let dir = (dirArbitrary + 4) % 4;
+
     switch (dir) {
       case 0:
         char = "➡️"
@@ -143,7 +144,7 @@ function sendVote(buttonState) {
 }
 
 
-// firefox ignores the default attributes if the page is not hard-reloaded
+// HACK: firefox ignores the default attributes if the page is not hard-reloaded
 $("button0").setAttribute("disabled", true);
 $("button1").setAttribute("disabled", true);
 $("button2").setAttribute("disabled", true);
