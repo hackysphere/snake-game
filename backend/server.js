@@ -2,10 +2,26 @@ import * as CONST from "../src/constants.js"
 import * as funct from "../src/functions.js"
 import express from 'express';
 
+import winston from 'winston';
+const { timestamp, printf, colorize, align } = winston.format;
+
 const DEVMODE = (process.env.NODE_ENV === "development");
 const LISTENPORT = DEVMODE ? 8080 : 80;
 const MOVEDELAY = DEVMODE ? CONST.MOVEDELAY_DEV : CONST.MOVEDELAY
 let gameState = CONST.DEFAULTSTATE();
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    colorize({level: true}),
+    timestamp({format: 'YYYY-MM-DD HH:mm:ss'}),
+    align(),
+    printf(((info) => `[${info.timestamp}] ${info.level}: ${info.message}`))
+  ),
+  transports: [
+    new winston.transports.Console()
+  ],
+});
 
 const app = express();
 app.use((req, res, next) => {
@@ -15,6 +31,12 @@ app.use((req, res, next) => {
   
   next();
 });
+
+app.use((req, res, next) => {
+  logger.http(`request to ${req.path} from ${req.ip}`);
+
+  next();
+})
 
 
 if (DEVMODE) {
@@ -51,9 +73,9 @@ app.get("/api/state", (req, res) => {
 
 for (let i = 0; i < 3; i++) {
   app.post(`/api/votes/${i}`, (req, res) => {
-    if (DEVMODE && req.headers.origin !== CONST.CLIENTURL) {
+    if (!DEVMODE && req.headers.origin !== CONST.CLIENTURL) {
       // someone is trying to vote from something that is definetely not the client
-      console.warn(`someone is trying to vote from ${req.headers.origin}`)
+      logger.warn(`someone is trying to vote from ${req.headers.origin}`)
       res.status(500); // lie because why not
       res.send();
       return;
@@ -78,7 +100,7 @@ app.listen(LISTENPORT, (err) => {
 
 setInterval(() => {
   if (gameState.next_ts < Date.now()) {
-    console.log(`new tick after gamestate:\n${JSON.stringify(gameState)}`)
+    logger.info(`new tick after gamestate:\n${JSON.stringify(gameState)}`)
     gameState = funct.newMove(gameState);
   }
-}, 1000)
+}, 1000);
