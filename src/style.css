@@ -85,7 +85,8 @@ button.chosen-vote {
 footer {
     font-size: 0.8rem;
 }
-footer img {
+footer img .icon {
+    /* currently unused, keeping in case I decide to use a profile icon again */
     height: 0.8rem;
     width: 0.8rem;
     scale: 2;
