@@ -34,7 +34,6 @@ export function getDirWithOffset(lastDir, change, offset=-1) {
   return boundedDir;
 }
 
-// FIXME: this is very very messy
 export function newMove(state, height=5, width=5) {
   try {
     // set up local db copy and base of new game state
@@ -52,120 +51,107 @@ export function newMove(state, height=5, width=5) {
     }
 
     // reset game if this was the "game win" "move"
-    if (tmpState.grid[0][0] == "✅") {
+    if (tmpState.grid[0][0] === "✅") {
       throw new Error("Game_WallHit");
     }
+    if (tmpState.votes.every(x => x === 0)) {
+      throw new Error("Game_NoVotes");
+    }
 
-    // winning vote and position calculation
     let voteIndex = 0;
     for (let i = 1; i < 3; i++) {
       if (tmpState.votes[i] > tmpState.votes[voteIndex]) {
         voteIndex = i;
       }
     }
-    // set "default" to middle option/same path
+
+    // set "default" to middle option (which is the same path)
     if ( tmpState.votes.filter(val => val !== tmpState.votes[voteIndex]).length !== 2 ) {
       voteIndex = 1;
     }
-    if (tmpState.votes.every(x => x == 0)) {
-      throw new Error("Game_NoVotes");
-    }
-    let dir = getDirWithOffset(tmpState.last_dir, voteIndex);
-    newState.last_dir = dir;
+    let newDir = getDirWithOffset(tmpState.last_dir, voteIndex);
+    newState.last_dir = newDir;
 
-    // setting new snake HEAD position to be checked and storing position's tile
-    let pos = structuredClone(tmpState.snake_pos[0]);  // javascript annoyance :(  (will change object state)
-    switch (dir) {
+    let newHeadPos = structuredClone(tmpState.snake_pos[0]);  // javascript annoyance :(  (will change object state if not used)
+    switch (newDir) {
       case 0:
-        pos[1]++;
+        newHeadPos[1]++;
         break;
       case 1:
-        pos[0]++;
+        newHeadPos[0]++;
         break;
       case 2:
-        pos[1]--;
+        newHeadPos[1]--;
         break;
       case 3:
-        pos[0]--;
+        newHeadPos[0]--;
         break;
       default:
         showError("Could not update board to new move!");
         return;
     }
-    // OOB collision check (otherwise setting tile breaks)
-    if (pos[0] < 0 || pos[0] >= state.grid.length) {
+    if (newHeadPos[0] < 0 || newHeadPos[0] >= state.grid.length) {
       throw new Error("Game_WallHit");
     }
-    if (pos[1] < 0 || pos[1] >= state.grid[0].length) {
+    if (newHeadPos[1] < 0 || newHeadPos[1] >= state.grid[0].length) {
       throw new Error("Game_WallHit");
     }
-    const currentTile = state.grid[pos[0]][pos[1]];
+    const currentTile = state.grid[newHeadPos[0]][newHeadPos[1]];
 
-    
 
-    // make new grid
     let widthElement = "0".repeat(width);
     let grid = Array(height).fill(widthElement);
 
-    // check if game has been won
-    // length check is 1 less than total grid area
-    if (tmpState.snake_pos.length == 24 && currentTile == "2") {
+    if (tmpState.snake_pos.length === 24 && currentTile === "2") {
       throw new Error("Game_GameWon");
     }
 
-    // wall check, setting apple (if needed), removing tail (if needed)
-    if (currentTile == "1") { // wall
+    if (currentTile === "1") {
       throw new Error("Game_WallHit");
       // this actually doesn't work as of 68a7c415, as the state doesn't have the wall tile yet...
       // keeping this in for easier future integration (or other "features")
     } else if (currentTile == "2") { // apple
-      let validPos = true;
+      let validApplePos = true;
       do {
-        validPos = true;
-        const newPlacement = [randomInt(0, state.grid.length), randomInt(0, state.grid[0].length)];
+        validApplePos = true;
+        const appleLoc = [randomInt(0, state.grid.length), randomInt(0, state.grid[0].length)];
 
-        // check if overlapping with body
         for (let i = 0; i < newState.snake_pos.length; i++) {
-          if (newState.snake_pos[i][0] === newPlacement[0] && newState.snake_pos[i][1] === newPlacement[1]) {
-            validPos = false;
+          if (newState.snake_pos[i][0] === appleLoc[0] && newState.snake_pos[i][1] === appleLoc[1]) {
+            validApplePos = false;
             break;
           }
         }
-        // also check if overlapping with head
-        if (newPlacement[0] === pos[0] && newPlacement[1] === pos[1]) {
-          validPos = false;
+        if (appleLoc[0] === newHeadPos[0] && appleLoc[1] === newHeadPos[1]) {
+          validApplePos = false;
         }
 
-        newState.apple_pos = newPlacement;
-      } while (!validPos);
+        newState.apple_pos = appleLoc;
+      } while (!validApplePos);
     } else {
       newState.snake_pos = newState.snake_pos.slice(0, -1);
     }
-    // put snake without head on grid
+    // put snake WITHOUT head on grid (because of upcoming collision check)
     for (let i = 0; i < newState.snake_pos.length; i++) {
       grid[newState.snake_pos[i][0]] = stringCharReplace(grid[newState.snake_pos[i][0]], "3", newState.snake_pos[i][1]);
     }
-    
     // put apple on grid
     grid[newState.apple_pos[0]] = stringCharReplace(grid[newState.apple_pos[0]], "2", newState.apple_pos[1]);
 
-    // check if hitting self from NEW state
-    if (grid[pos[0]][pos[1]] == "3") {
+    if (grid[newHeadPos[0]][newHeadPos[1]] == "3") {
       throw new Error("Game_WallHit");
     }
 
     // NOW set head
     // this is here otherwise the hit self check will always be hitting the head!
-    newState.snake_pos.unshift(pos);
-    grid[pos[0]] = stringCharReplace(grid[pos[0]], "3", pos[1]);
+    newState.snake_pos.unshift(newHeadPos);
+    grid[newHeadPos[0]] = stringCharReplace(grid[newHeadPos[0]], "3", newHeadPos[1]);
 
-    
-    // save the grid
     newState.grid = grid;
     return newState;
   } catch (err) {
     if (err.message === "Game_WallHit") {
-      return CONST.DEFAULTSTATE()
+      return CONST.DEFAULTSTATE();
     } else if (err.message === "Game_NoVotes") {
       let tmpState = structuredClone(state);
       tmpState.last_ts = Date.now();
