@@ -134,8 +134,7 @@ function sendVote(buttonState) {
 
   fetch(SERVERURL + `/api/votes/${buttonId}`, { method: "POST" })
   .then(() => {
-    // do not add button editing, as the database would have been fetched right before this
-    // (and button would have been consequently edited)
+    // do not add button editing, as the database will be reupdated locally after this
   }).catch((error) => {
     showError("Vote could not be sent!!!");
     $(`button${buttonId}`).innerHTML += "🛑";

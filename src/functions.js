@@ -22,7 +22,7 @@ export function randomInt(min, max) {
 }
 
 // FIXME: this is very very messy
-export function newMove(state) {
+export function newMove(state, height=5, width=5) {
   try {
     // set up local db copy and base of new game state
     const tmpState = structuredClone(state);
@@ -92,14 +92,8 @@ export function newMove(state) {
     
 
     // make new grid
-    // FIXME: this grid is hardcoded
-    let grid = [
-      "00000",
-      "00000",
-      "00000",
-      "00000",
-      "00000"
-    ]
+    let widthElement = "0".repeat(width);
+    let grid = Array(height).fill(widthElement);
 
     // check if game has been won
     // length check is 1 less than total grid area
