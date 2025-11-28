@@ -51,9 +51,10 @@ app.get("/api/state", (req, res) => {
 
 for (let i = 0; i < 3; i++) {
   app.post(`/api/votes/${i}`, (req, res) => {
-    if (!DEVMODE && req.headers.origin !== CONST.CLIENTURL) {
+    if (DEVMODE && req.headers.origin !== CONST.CLIENTURL) {
       // someone is trying to vote from something that is definetely not the client
-      res.status(400);
+      console.warn(`someone is trying to vote from ${req.headers.origin}`)
+      res.status(500); // lie because why not
       res.send();
       return;
     };
@@ -61,6 +62,12 @@ for (let i = 0; i < 3; i++) {
     res.status(200);
     res.send();
   });
+}
+
+if (!DEVMODE) {
+  /*  this allows for express to serve the vite app as well, BUT it first must be built!!
+  if in devmode, it is better to use a seperate vite process for HMR */
+  app.use(express.static("dist/"))
 }
 
 app.listen(LISTENPORT, (err) => {
@@ -71,6 +78,7 @@ app.listen(LISTENPORT, (err) => {
 
 setInterval(() => {
   if (gameState.next_ts < Date.now()) {
+    console.log(`new tick after gamestate:\n${JSON.stringify(gameState)}`)
     gameState = funct.newMove(gameState);
   }
 }, 1000)
