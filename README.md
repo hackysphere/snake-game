@@ -30,7 +30,9 @@ the game is exposed by default on port 8012
 if you change anything in `.env`, you will have to run `docker compose up -d --build --force-recreate` after saving changes
 
 ### running from source-specific steps
-run `pnpm serve-full`  
+1. [install pnpm](https://pnpm.io/installation)
+1. install dependencies with `pnpm install`
+1. run `pnpm serve-full`  
 the game is exposed by default on port 8012, so you will probably want to proxy this if you don't want to give everyone a url of `http://domain:8012`
 * remember to change `NODE_USING_TRUSTED_PROXY` if choosing to use a proxy!
 
