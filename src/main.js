@@ -13,7 +13,7 @@ if (import.meta.env.DEV) {
   if (DEVMODE) { $("dev-build-data").innerHTML += "DEVMODE "; }
   if (MULTIVOTE) { $("dev-build-data").innerHTML += "MULTIVOTE "; }
 }
-const SERVERURL = DEVMODE ? "http://localhost:8080" : import.meta.env.VITE_API_SERVER_URL;
+const SERVERURL = DEVMODE ? "http://localhost:8080" : import.meta.env.VITE_APP_URL;
 
 /**
  * Variables to prevent easy doublevoting

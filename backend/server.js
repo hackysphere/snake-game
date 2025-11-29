@@ -8,7 +8,7 @@ const { timestamp, printf, colorize, align } = winston.format;
 const DEVMODE = (process.env.NODE_ENV === "development");
 const LISTENPORT = DEVMODE ? 8080 : 8012;
 const MOVEDELAY = DEVMODE ? CONST.MOVEDELAY_DEV : CONST.MOVEDELAY;
-const CLIENTURL = process.env.NODE_CLIENT_CORS_URL;
+const CLIENTURL = process.env.VITE_APP_URL;
 const PROXIED_STATUS = DEVMODE || ( process.env.NODE_USING_TRUSTED_PROXY ?? false );
 let gameState = CONST.DEFAULTSTATE();
 
