@@ -1,9 +1,5 @@
 // NOTE TO SELF: grid length and width will always be set to 5x5 due to functions.js newMove
 
-// these are only used in production, local URLs are used in development
-export const CLIENTURL = "https://snake.hcks.dev";
-export const SERVERURL = "https://snake.hcks.dev"; // only change this URL if not serving app from express
-
 export const MOVEDELAY = 60000;
 export const MOVEDELAY_DEV = 15000;
 
