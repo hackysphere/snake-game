@@ -3,4 +3,4 @@ services:
     container_name: snake-game
     build: .
     ports:
-      - 80:8012
+      - 8012:8012

@@ -9,11 +9,12 @@ const DEVMODE = (process.env.NODE_ENV === "development");
 const LISTENPORT = DEVMODE ? 8080 : 8012;
 const MOVEDELAY = DEVMODE ? CONST.MOVEDELAY_DEV : CONST.MOVEDELAY;
 const CLIENTURL = process.env.VITE_APP_URL;
-const PROXIED_STATUS = DEVMODE || ( process.env.NODE_USING_TRUSTED_PROXY ?? false );
+const PROXIED_STATUS = DEVMODE || (process.env.NODE_USING_TRUSTED_PROXY === "true");
+const LOG_LEVEL = process.env.NODE_LOG_LEVEL ?? 'info'
 let gameState = CONST.DEFAULTSTATE();
 
 const logger = winston.createLogger({
-  level: 'info',
+  level: LOG_LEVEL,
   format: winston.format.combine(
     colorize({level: true}),
     timestamp({format: 'YYYY-MM-DD HH:mm:ss'}),
@@ -28,7 +29,7 @@ const logger = winston.createLogger({
 
 const app = express();
 app.set('trust-proxy', PROXIED_STATUS);
-if (PROXIED_STATUS) { logger.warn("make sure there are no forged X-Forwarded-For/Host/Proto headers!!!") }
+if (PROXIED_STATUS) { logger.warn("make sure there are no forged X-Forwarded-For/Host/Proto headers!!!"); };
 
 app.use((req, res, next) => {
   DEVMODE

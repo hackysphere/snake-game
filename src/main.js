@@ -13,6 +13,7 @@ if (import.meta.env.DEV) {
   if (DEVMODE) { $("dev-build-data").innerHTML += "DEVMODE "; }
   if (MULTIVOTE) { $("dev-build-data").innerHTML += "MULTIVOTE "; }
 }
+// TODO: consider removing entirely and basing off of current domain so that docker can have CI/CD support
 const SERVERURL = DEVMODE ? "http://localhost:8080" : import.meta.env.VITE_APP_URL;
 
 /**
