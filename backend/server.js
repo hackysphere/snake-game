@@ -28,7 +28,7 @@ const logger = winston.createLogger({
 
 
 const app = express();
-app.set('trust-proxy', PROXIED_STATUS);
+app.set('trust proxy', PROXIED_STATUS);
 if (PROXIED_STATUS) { logger.warn("make sure there are no forged X-Forwarded-For/Host/Proto headers!!!"); };
 
 app.use((req, res, next) => {
@@ -41,6 +41,11 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   logger.http(`request to ${req.path} from ${req.ip}`);
 
+  next();
+})
+
+app.use((req, res, next) => {
+  logger.http(`request with header ${JSON.stringify(req.headers)}`);
   next();
 })
 

@@ -132,11 +132,20 @@ function sendVote(buttonState) {
 
   fetch(SERVERURL + `/api/votes/${buttonId}`, { method: "POST" })
   .then(() => {
-    // do not add button editing, as the database will be reupdated locally after this
+    pullAndUpdate();
   }).catch((error) => {
     showError("Vote could not be sent!!!");
     $(`button${buttonId}`).innerHTML += "🛑";
     $(`button${buttonId}`).classList.add("chosen-vote");
+  });
+}
+
+function pullAndUpdate() {
+  fetch(SERVERURL + "/api/state")
+  .then((res) => res.json())
+  .then((json_res) => {
+    dbState = json_res;
+    updateBoard(dbState);
   });
 }
 
@@ -152,14 +161,10 @@ $("button1").addEventListener("click", sendVote);
 $("button2").addEventListener("click", sendVote);
 
 // database connection
-setInterval(() => {
-  fetch(SERVERURL + "/api/state")
-  .then((res) => res.json())
-  .then((json_res) => {
-    dbState = json_res;
-    updateBoard(dbState);
-  });
-}, 1000);
+setInterval(() => { pullAndUpdate(); }, 7000);
+
+// load it once so that loading doesn't take 7 seconds
+pullAndUpdate();
 
 
 // dev, very unsafe
@@ -185,14 +190,14 @@ if (DEVMODE) {
       case "n":
         window.DEV_NEXTMOVE();
         break;
+      case "l":
+        pullAndUpdate();
+        break;
     }
   });
 
-  window.DEV_BLOCKEDSTATE = CONST.DEFAULTSTATE();
-  window.DEV_BLOCKEDSTATE.last_ts = -1;
-
   window.DEV_GETVARS = () => {return [lastVoteTs, dbState]};
-  window.DEV_RESETSTATE = () => fetch(SERVERURL + "/api/devel/newgame");
+  window.DEV_RESETSTATE = () => {fetch(SERVERURL + "/api/devel/newgame"); pullAndUpdate();};
   window.DEV_BYPASSLOCK = () => {lastVoteTs = 0; updateBoard();};
   window.DEV_CUSTOMMOVE = (dir) => {
     let voteindex;
@@ -206,9 +211,10 @@ if (DEVMODE) {
       return;
     }
     fetch(SERVERURL + `/api/votes/${voteindex}`, { method: "POST" });
+    pullAndUpdate();
   };
   window.DEV_DEFAULTSTATE = () => CONST.DEFAULTSTATE();
-  window.DEV_NEXTMOVE = () => fetch(SERVERURL + "/api/devel/newtick")
+  window.DEV_NEXTMOVE = () => {fetch(SERVERURL + "/api/devel/newtick"); pullAndUpdate();};
 
   window.$ = $;
 }
