@@ -6,7 +6,7 @@ this does not use a database, rather all data is kept in memory and restarted fr
 "database" schema can be found in [docs/db-schema.md](docs/db-schema.md)  
 some logging is done to console output through winston, logging level can be changed in `backend/server.js`
 
-each client also pings your server one time per second (because I didn't do sockets), so make sure that's okay, I guess?
+each client also pings your server once every 7 seconds (because I didn't do sockets), so make sure that's okay, I guess?
 
 ## installation
 
