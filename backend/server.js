@@ -8,8 +8,8 @@ const { timestamp, printf, colorize, align } = winston.format;
 const DEVMODE = (process.env.NODE_ENV === "development");
 const LISTENPORT = DEVMODE ? 8080 : 8012;
 const MOVEDELAY = DEVMODE ? CONST.MOVEDELAY_DEV : CONST.MOVEDELAY;
-const CLIENTURL = process.env.VITE_APP_URL;
-const PROXIED_STATUS = DEVMODE || (process.env.NODE_USING_TRUSTED_PROXY === "true");
+const CLIENTURL = process.env.APP_URL;
+const PROXIED_STATUS = DEVMODE || (process.env.USING_TRUSTED_PROXY === "true");
 const LOG_LEVEL = process.env.NODE_LOG_LEVEL ?? 'info'
 let gameState = CONST.DEFAULTSTATE();
 
@@ -100,7 +100,7 @@ if (!DEVMODE) {
 }
 
 app.listen(LISTENPORT, (err) => {
-  if (!err) { logger.info(`server is up on ${CLIENTURL ?? "http://localhost:8080"}`); }
+  if (!err) { logger.info(`server should be up on ${CLIENTURL ?? "http://localhost:8080"}`); }
   else { logger.error(err); };
 });
 

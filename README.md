@@ -18,8 +18,8 @@ some logging is done to console output through winston, logging level can be cha
 1. clone this repo
 1. make a copy of `.env.example` as `.env`
 1. edit the environment variables to match your setup
-    * `VITE_APP_URL`: change to the full URL where this will be accessible at
-    * `NODE_USING_TRUSTED_PROXY`: set to true if you are using a proxy (nginx, caddy, cloudflare) 
+    * `APP_URL`: change to the full URL where this will be accessible at (cannot be at a subpath)
+    * `USING_TRUSTED_PROXY`: set to true if you are using a proxy (nginx, caddy, cloudflare) 
         * if you are using a proxy, **MAKE SURE** that it sends a *safe* X-Forwarded-For header, and that the client IP is the first/leftmost one (configure your proxy if the wrong IP shows up)
     * `NODE_LOG_LEVEL`: change to `http` if you want a log printed for each network request
 
