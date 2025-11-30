@@ -99,7 +99,7 @@ if (!DEVMODE) {
   logger.warn("you are in development mode!")
 }
 
-app.listen(LISTENPORT, (err) => {
+const server = app.listen(LISTENPORT, (err) => {
   if (!err) { logger.info(`server should be up on ${CLIENTURL ?? "http://localhost:8080"}`); }
   else { logger.error(err); };
 });
@@ -111,3 +111,13 @@ setInterval(() => {
     gameState = funct.newMove(gameState);
   }
 }, 1000);
+
+
+const stop_server = (() => {
+  logger.info("shutting down server");
+  server.close();
+  process.exit();
+});
+
+process.on('SIGTERM', stop_server);
+process.on('SIGINT', stop_server);
