@@ -4,3 +4,7 @@ services:
     build: .
     ports:
       - 8012:8012
+    environment:
+      APP_URL: "http://YOUR.DOMAIN:8012"
+      USING_TRUSTED_PROXY: false
+      NODE_LOG_LEVEL: "info"

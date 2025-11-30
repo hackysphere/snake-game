@@ -16,4 +16,5 @@ FROM base
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
 EXPOSE 8012
-CMD [ "pnpm", "serve" ]
+# HACK: using npm instead of pnpm because otherwise the image pulls pnpm on each load, and fails if network is inaccessible
+CMD [ "npm", "run", "serve-noenvfile", "--no-update-notifier" ]
