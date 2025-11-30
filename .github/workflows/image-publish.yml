@@ -1,0 +1,60 @@
+# copied and adapted from https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images#publishing-images-to-github-packages
+
+name: "Publish image to GHCR"
+
+on:
+  push:
+    # branches:
+    #   - 'main'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  REGISTRY: "ghcr.io"
+  IMAGE_NAME: ${{github.repository}}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v6
+      
+      - name: "Login to GHCR"
+        uses: docker/login-action@v3
+        with:
+          registry: ${{env.REGISTRY}}
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      
+      - name: "Create labels and tag for Docker image"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # note to self: this turns into "{ghcr.io}/{hackysphere/snake-game}"
+          images: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}
+      
+      - name: "Build and push Docker image"
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{steps.meta.outputs.tags}}
+          labels: ${{steps.meta.outputs.labels}}
+      
+      - name: "Generate attestation"
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}
+          subject-digest: ${{steps.push.outputs.digest}}
+          push-to-registry: true
+        continue-on-error: true

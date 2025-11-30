@@ -1,10 +1,4 @@
 # snake-game
-
-## READ!!
-this is still very subject to change, and not stable yet  
-proceed with caution
-## normal content follows
-
 this is an attempt at making a multiplayer game of snake which runs on a single global game board  
 it doesn't have any auth (all anonymous requests), and has *very minimal* request checking  
 this does not use a database, rather all data is kept in memory and restarted from scratch when server is reloaded
@@ -17,10 +11,7 @@ each client also pings your server one time per second (because I didn't do sock
 ## installation
 
 ### docker compose-specific steps
-~~1. get the [docker-compose.yml](docker-compose.yml)~~  
-the image is not published yet, so for now:
-1. clone the repo
-1. open the docker-compose.yml
+1. get the [docker-compose.yml](docker-compose.yml)
 1. [set up the environment variables](#environment-variables)
 1. configure the exposed port if needed, otherwise the game is exposed on 8012 by default
 1. run `docker compose up -d`
@@ -57,6 +48,3 @@ however, if you do want to contribute:
 `main.js` has two constants at the top of the file that can be changed to enable or disable development features  
 `.env` is currently not applied when in development because of hardcoded local ports and URLs  
 logging amount can be changed through the `LOG_LEVEL` constant in [backend/server.js](backend/server.js)
-
-### notes on docker
-the dockerfile is taken from pnpm documentation, and as such it may have issues with CI/CD services due to buildx caching for pnpm dependencies

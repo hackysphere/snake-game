@@ -1,7 +1,7 @@
 services:
   snake-game:
     container_name: snake-game
-    build: .
+    image: ghcr.io/hackysphere/snake-game:latest
     ports:
       - 8012:8012
     environment:
