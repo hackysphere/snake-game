@@ -20,9 +20,9 @@ const SERVERURL = DEVMODE ? "http://localhost:8080" : window.location.origin;
  * Must be also set in updateStorage and sendVote
  * There is probably a better way to do this
  */
-let lastVoteTs = localStorage.getItem("vote_lastTs") ?? 0;
 let lastVoteChoice = localStorage.getItem("vote_lastChoice") ?? null;
 let lastGameId = localStorage.getItem("lastGameId") ?? null;
+let lastGameMove = localStorage.getItem("vote_lastGameMove") ?? 0;
 
 let dbState;
 let errTrip = false;
@@ -41,9 +41,9 @@ function showError(message) {
  * This is only called when voting for a move
  */
 function updateStorage() {
-  localStorage.setItem("vote_lastTs", lastVoteTs);
   localStorage.setItem("vote_lastChoice", lastVoteChoice);
   localStorage.setItem("lastGameId", lastGameId);
+  localStorage.setItem("vote_lastGameMove", lastGameMove);
 }
 
 function updateBoard() {
@@ -80,7 +80,7 @@ function setButtons() {
   for (let i = 0; i < 3; i++) {
     let char = "";
 
-    if (lastVoteTs > dbState.last_ts && lastGameId === dbState.game_id && !MULTIVOTE) {
+    if (lastGameMove >= dbState.move && lastGameId === dbState.game_id && !MULTIVOTE) {
       $(`button${i}`).setAttribute("disabled", true);
     } else {
       $(`button${i}`).removeAttribute("disabled");
@@ -121,9 +121,9 @@ function setButtons() {
 /** @param {Event} buttonState  */ // this is here because I'm not using typescript yet...
 function sendVote(buttonState) {
   let buttonId = buttonState.target.id.split("button")[1];
-  lastVoteTs = Date.now();
   lastVoteChoice = buttonId;
   lastGameId = dbState.game_id;
+  lastGameMove = dbState.move;
   updateStorage();
 
   $("button0").setAttribute("disabled", true);
@@ -196,9 +196,9 @@ if (DEVMODE) {
     }
   });
 
-  window.DEV_GETVARS = () => {return [lastVoteTs, dbState]};
+  window.DEV_GETVARS = () => {return [lastGameMove, dbState]};
   window.DEV_RESETSTATE = () => {fetch(SERVERURL + "/api/devel/newgame"); pullAndUpdate();};
-  window.DEV_BYPASSLOCK = () => {lastVoteTs = 0; updateBoard();};
+  window.DEV_BYPASSLOCK = () => {lastGameMove = 0; updateBoard();};
   window.DEV_CUSTOMMOVE = (dir) => {
     let voteindex;
     if (dbState.last_dir === dir) {
