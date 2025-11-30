@@ -155,7 +155,6 @@ export function newMove(state, height=5, width=5) {
     } else if (err.message === "Game_NoVotes") {
       let tmpState = structuredClone(state);
       tmpState.last_ts = Date.now();
-      tmpState.move += 1;
       tmpState.next_ts = Date.now() + CONST.MOVEDELAY;
       tmpState.votes = [0, 0, 0];
 
