@@ -34,6 +34,7 @@ export function getDirWithOffset(lastDir, change, offset=-1) {
   return boundedDir;
 }
 
+// NOTE: height cannot be more than 5 because there is not enough HTML elements in the frontend
 export function newMove(state, height=5, width=5) {
   try {
     // set up local db copy and base of new game state

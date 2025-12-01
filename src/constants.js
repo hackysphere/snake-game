@@ -1,5 +1,3 @@
-// NOTE TO SELF: grid length and width will always be set to 5x5 due to functions.js newMove
-
 export const MOVEDELAY = 60000;
 export const MOVEDELAY_DEV = 15000;
 
