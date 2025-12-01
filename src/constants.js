@@ -1,5 +1,5 @@
-export const MOVEDELAY = 60000;
-export const MOVEDELAY_DEV = 15000;
+export const MOVEDELAY = 30000;
+export const MOVEDELAY_DEV = 10000;
 
 export const DEFAULTSTATE = (() => { return {
   "game_id": crypto.randomUUID(),
