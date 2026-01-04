@@ -12,11 +12,11 @@
     "serve-noenvfile": "NODE_ENV=production node backend/server.js"
   },
   "devDependencies": {
-    "@types/express": "^5.0.5",
-    "vite": "^7.2.4"
+    "@types/express": "^5.0.6",
+    "vite": "^7.3.0"
   },
   "dependencies": {
-    "express": "^5.2.0",
-    "winston": "^3.18.3"
+    "express": "^5.2.1",
+    "winston": "^3.19.0"
   }
 }
