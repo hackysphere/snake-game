@@ -1,6 +1,7 @@
 # snake-game
+
 this is an attempt at making a multiplayer game of snake which runs on a single global game board  
-it doesn't have any auth (all anonymous requests), and has *very minimal* request checking  
+it doesn't have any auth (all anonymous requests), and has _very minimal_ request checking  
 this does not use a database, rather all data is kept in memory and restarted from scratch when server is reloaded
 
 "database" schema can be found in [docs/db-schema.md](docs/db-schema.md)  
@@ -11,12 +12,14 @@ each client also pings your server once every 7 seconds (because I didn't do soc
 ## installation
 
 ### docker compose-specific steps
+
 1. get the [docker-compose.yml](docker-compose.yml)
 1. [set up the environment variables](#environment-variables)
 1. configure the exposed port if needed, otherwise the game is exposed on 8012 by default
 1. run `docker compose up -d`
 
 ### shared steps
+
 1. [install pnpm](https://pnpm.io/installation)
 1. clone this repo
 1. make a copy of `.env.example` as `.env`
@@ -28,15 +31,18 @@ each client also pings your server once every 7 seconds (because I didn't do soc
 for restarts, you should only need to run `pnpm serve`
 
 the game is exposed by default on port 8012, so you will probably want to proxy this if you don't want to give everyone a url of `http://domain:8012`
-* remember to change `NODE_USING_TRUSTED_PROXY` if choosing to use a proxy!
+
+- remember to change `NODE_USING_TRUSTED_PROXY` if choosing to use a proxy!
 
 ### environment variables
-* `APP_URL`: change to the full URL where this will be accessible at (cannot be at a subpath)
-* `USING_TRUSTED_PROXY`: set to true if you are using a proxy (nginx, caddy, cloudflare) 
-    * if you are using a proxy, **MAKE SURE** that it sends a *safe* X-Forwarded-For header, and that the client IP is the first/leftmost one (configure your proxy if the wrong IP shows up)
-* `NODE_LOG_LEVEL`: change to `http` if you want a log printed for each network request
+
+- `APP_URL`: change to the full URL where this will be accessible at (cannot be at a subpath)
+- `USING_TRUSTED_PROXY`: set to true if you are using a proxy (nginx, caddy, cloudflare)
+  - if you are using a proxy, **MAKE SURE** that it sends a _safe_ X-Forwarded-For header, and that the client IP is the first/leftmost one (configure your proxy if the wrong IP shows up)
+- `NODE_LOG_LEVEL`: change to `http` if you want a log printed for each network request
 
 ## contributing/development
+
 before spending time on this project, please consider that this is mostly a learning project that I did to learn fullstack web development, and that I won't be able to provide much support.  
 however, if you do want to contribute:
 

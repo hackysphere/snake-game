@@ -3,15 +3,21 @@
 
 import * as CONST from "./constants.js";
 import * as funct from "./functions.js";
-const $ = (id) => {return document.getElementById(id)};
+const $ = (id) => {
+  return document.getElementById(id);
+};
 
 // these will always be disabled in production due to vite build states
-const DEVMODE = import.meta.env.DEV && !false
-const MULTIVOTE = import.meta.env.DEV && false
+const DEVMODE = import.meta.env.DEV && !false;
+const MULTIVOTE = import.meta.env.DEV && false;
 if (import.meta.env.DEV) {
   $("dev-build").removeAttribute("hidden");
-  if (DEVMODE) { $("dev-build-data").innerHTML += "DEVMODE "; }
-  if (MULTIVOTE) { $("dev-build-data").innerHTML += "MULTIVOTE "; }
+  if (DEVMODE) {
+    $("dev-build-data").innerHTML += "DEVMODE ";
+  }
+  if (MULTIVOTE) {
+    $("dev-build-data").innerHTML += "MULTIVOTE ";
+  }
 }
 const SERVERURL = DEVMODE ? "http://localhost:8080" : window.location.origin;
 
@@ -26,7 +32,6 @@ let lastGameMove = localStorage.getItem("vote_lastGameMove") ?? 0;
 
 let dbState;
 let errTrip = false;
-
 
 function showError(message) {
   errTrip = true;
@@ -50,31 +55,44 @@ function updateBoard() {
   errTrip = false;
   try {
     for (let i = 0; i < dbState.grid.length; i++) {
-      $(`row${i}`).innerHTML = dbState.grid[i].replaceAll("0", "🟩")  // empty
-                                              .replaceAll("1", "⬛")  // wall
-                                              .replaceAll("2", "🍎")  // apple
-                                              .replaceAll("3", "🟨")  // snake (any);
+      $(`row${i}`).innerHTML = dbState.grid[i]
+        .replaceAll("0", "🟩") // empty
+        .replaceAll("1", "⬛") // wall
+        .replaceAll("2", "🍎") // apple
+        .replaceAll("3", "🟨"); // snake (any);
     }
 
     // snake head
     let pos_head = dbState.snake_pos[0];
     let pos_tail = dbState.snake_pos.at(-1);
-    $(`row${pos_head[0]}`).innerHTML = funct.stringCharReplace($(`row${pos_head[0]}`).innerHTML, "😶", pos_head[1]);
-    $(`row${pos_tail[0]}`).innerHTML = funct.stringCharReplace($(`row${pos_tail[0]}`).innerHTML, "🟡", pos_tail[1]);
+    $(`row${pos_head[0]}`).innerHTML = funct.stringCharReplace(
+      $(`row${pos_head[0]}`).innerHTML,
+      "😶",
+      pos_head[1],
+    );
+    $(`row${pos_tail[0]}`).innerHTML = funct.stringCharReplace(
+      $(`row${pos_tail[0]}`).innerHTML,
+      "🟡",
+      pos_tail[1],
+    );
 
     setButtons(); // consider taking into this function? maybe??
 
-    $("next-move").innerHTML = (new Date(dbState.next_ts)).toLocaleTimeString();
+    $("next-move").innerHTML = new Date(dbState.next_ts).toLocaleTimeString();
     $("current-move").innerHTML = dbState.move;
 
-    if (dbState.grid[0][0] === "✅") { showError("the game has been won!!!"); }
+    if (dbState.grid[0][0] === "✅") {
+      showError("the game has been won!!!");
+    }
 
-    if (!errTrip) { $("error-message").setAttribute("hidden", true); }
+    if (!errTrip) {
+      $("error-message").setAttribute("hidden", true);
+    }
   } catch (error) {
     showError("Error in parsing database, please report if this keeps repeating");
     console.error(error);
   }
-};
+}
 
 function setButtons() {
   for (let i = 0; i < 3; i++) {
@@ -92,19 +110,19 @@ function setButtons() {
 
     switch (dir) {
       case 0:
-        char = "➡️"
+        char = "➡️";
         break;
       case 1:
-        char = "⬇️"
+        char = "⬇️";
         break;
       case 2:
-        char = "⬅️"
+        char = "⬅️";
         break;
       case 3:
-        char = "⬆️"
+        char = "⬆️";
         break;
       default:
-        char = "❓"
+        char = "❓";
         $(`button${i}`).setAttribute("disabled", true);
         showError("Error: Invalid last move");
         break;
@@ -131,24 +149,24 @@ function sendVote(buttonState) {
   $("button2").setAttribute("disabled", true);
 
   fetch(SERVERURL + `/api/votes/${buttonId}`, { method: "POST" })
-  .then(() => {
-    pullAndUpdate();
-  }).catch((error) => {
-    showError("Vote could not be sent!!!");
-    $(`button${buttonId}`).innerHTML += "🛑";
-    $(`button${buttonId}`).classList.add("chosen-vote");
-  });
+    .then(() => {
+      pullAndUpdate();
+    })
+    .catch((error) => {
+      showError("Vote could not be sent!!!");
+      $(`button${buttonId}`).innerHTML += "🛑";
+      $(`button${buttonId}`).classList.add("chosen-vote");
+    });
 }
 
 function pullAndUpdate() {
   fetch(SERVERURL + "/api/state")
-  .then((res) => res.json())
-  .then((json_res) => {
-    dbState = json_res;
-    updateBoard(dbState);
-  });
+    .then((res) => res.json())
+    .then((json_res) => {
+      dbState = json_res;
+      updateBoard(dbState);
+    });
 }
-
 
 // HACK: firefox ignores the default attributes if the page is not hard-reloaded
 $("button0").setAttribute("disabled", true);
@@ -161,11 +179,12 @@ $("button1").addEventListener("click", sendVote);
 $("button2").addEventListener("click", sendVote);
 
 // database connection
-setInterval(() => { pullAndUpdate(); }, 7000);
+setInterval(() => {
+  pullAndUpdate();
+}, 7000);
 
 // load it once so that loading doesn't take 7 seconds
 pullAndUpdate();
-
 
 // dev, very unsafe
 if (DEVMODE) {
@@ -196,16 +215,24 @@ if (DEVMODE) {
     }
   });
 
-  window.DEV_GETVARS = () => {return [lastGameMove, dbState]};
-  window.DEV_RESETSTATE = () => {fetch(SERVERURL + "/api/devel/newgame"); pullAndUpdate();};
-  window.DEV_BYPASSLOCK = () => {lastGameMove = 0; updateBoard();};
+  window.DEV_GETVARS = () => {
+    return [lastGameMove, dbState];
+  };
+  window.DEV_RESETSTATE = () => {
+    fetch(SERVERURL + "/api/devel/newgame");
+    pullAndUpdate();
+  };
+  window.DEV_BYPASSLOCK = () => {
+    lastGameMove = 0;
+    updateBoard();
+  };
   window.DEV_CUSTOMMOVE = (dir) => {
     let voteindex;
     if (dbState.last_dir === dir) {
       voteindex = 1;
-    } else if (((dbState.last_dir + 1 + 4) % 4) === dir) {
+    } else if ((dbState.last_dir + 1 + 4) % 4 === dir) {
       voteindex = 2;
-    } else if (((dbState.last_dir - 1 + 4) % 4) === dir) {
+    } else if ((dbState.last_dir - 1 + 4) % 4 === dir) {
       voteindex = 0;
     } else {
       return;
@@ -214,7 +241,10 @@ if (DEVMODE) {
     pullAndUpdate();
   };
   window.DEV_DEFAULTSTATE = () => CONST.DEFAULTSTATE();
-  window.DEV_NEXTMOVE = () => {fetch(SERVERURL + "/api/devel/newtick"); pullAndUpdate();};
+  window.DEV_NEXTMOVE = () => {
+    fetch(SERVERURL + "/api/devel/newtick");
+    pullAndUpdate();
+  };
 
   window.$ = $;
 }
