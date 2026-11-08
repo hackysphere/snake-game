@@ -1,5 +1,5 @@
-import * as CONST from "../src/constants.js";
-import * as funct from "../src/functions.js";
+import * as CONST from "./src/constants.js";
+import * as funct from "./src/functions.js";
 import express from "express";
 
 import winston from "winston";
@@ -24,27 +24,32 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
+if (!DEVMODE && CLIENTURL === undefined) {
+  logger.error("you did not send a value for APP_URL !! exiting...");
+  process.exit()
+}
+
 const app = express();
 app.set("trust proxy", PROXIED_STATUS);
 if (PROXIED_STATUS) {
   logger.warn("make sure there are no forged X-Forwarded-For/Host/Proto headers!!!");
 }
 
-app.use((req, res, next) => {
+app.use((_, res, next) => {
   DEVMODE
     ? res.setHeader("Access-Control-Allow-Origin", "*")
     : res.setHeader("Access-Control-Allow-Origin", CLIENTURL);
 
   next();
 });
-app.use((req, res, next) => {
+app.use((req, _, next) => {
   logger.http(`request to ${req.path} from ${req.ip}`);
 
   next();
 });
 
 if (DEVMODE) {
-  app.get("/api", (req, res) => {
+  app.get("/api", (_, res) => {
     res.json({
       dev: DEVMODE,
       delay: MOVEDELAY,
@@ -52,7 +57,7 @@ if (DEVMODE) {
     });
   });
 
-  app.get("/api/devel/newgame", (req, res) => {
+  app.get("/api/devel/newgame", (_, res) => {
     gameState = CONST.DEFAULTSTATE();
     res.json({
       dev: DEVMODE,
@@ -61,7 +66,7 @@ if (DEVMODE) {
     });
   });
 
-  app.get("/api/devel/newtick", (req, res) => {
+  app.get("/api/devel/newtick", (_, res) => {
     gameState = funct.newMove(gameState);
     res.json({
       dev: DEVMODE,
@@ -71,7 +76,7 @@ if (DEVMODE) {
   });
 }
 
-app.get("/api/state", (req, res) => {
+app.get("/api/state", (_, res) => {
   res.json(gameState);
 });
 
